@@ -70,6 +70,8 @@ pipeline {
                 reportFiles: '*.*',
                 reportName: "Documentation"
             ])
+            archiveArtifacts artifacts: 'dist/openhps-rest-client.js', fingerprint: true
+            archiveArtifacts artifacts: 'dist/openhps-rest-client.min.js', fingerprint: true
             deleteDir()
         }
     }
