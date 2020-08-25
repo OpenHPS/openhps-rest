@@ -36,6 +36,15 @@ If you have [npm installed](https://www.npmjs.com/get-npm), start using @openhps
 npm install @openhps/rest --save
 ```
 
+### Usage
+```typescript
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+
+const app = express();
+app.use(bodyParser.json()); // Body parser is required
+```
+
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.
 

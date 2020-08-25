@@ -63,17 +63,13 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
                             if (response.data.frame !== undefined) {
                                 const pushPromises: Array<Promise<void>> = [];
                                 this.outputNodes.forEach((node) => {
-                                    pushPromises.push(node.push(response.data.frame));
+                                    pushPromises.push(node.push(DataSerializer.deserialize(response.data.frame)));
                                 });
-                                if (pushPromises.length === 0) {
-                                    resolve();
-                                } else {
-                                    Promise.resolve(pushPromises)
-                                        .then(() => {
-                                            resolve();
-                                        })
-                                        .catch(reject);
-                                }
+                                Promise.all(pushPromises)
+                                    .then(() => {
+                                        resolve();
+                                    })
+                                    .catch(reject);
                             } else {
                                 resolve();
                             }

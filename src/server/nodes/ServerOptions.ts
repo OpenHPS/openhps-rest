@@ -1,6 +1,8 @@
 import * as express from 'express';
+import { ProcessingNodeOptions } from '@openhps/core';
 
-export class ServerOptions {
-    public path: string;
-    public express: express.Express;
+export interface ServerOptions extends ProcessingNodeOptions {
+    path: string;
+    express: express.Express;
+    pullTimeout?: number;
 }
