@@ -81,9 +81,11 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
 
         this.pull()
             .then(() => {
-                res.status(200).json({
-                    message: `Pull performed to node with uid ${this.uid}`,
-                });
+                if (!res.headersSent) {
+                    res.status(200).json({
+                        message: `Pull performed to node with uid ${this.uid}`,
+                    });
+                }
             })
             .catch((ex) => {
                 res.status(505).json({ exception: ex });
