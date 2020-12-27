@@ -6,7 +6,7 @@ export class RESTServerSource<Out extends DataFrame> extends SourceNode<Out> {
     private _remoteNode: RESTServerNode<Out, Out>;
 
     constructor(options: ServerOptions, outputType?: new () => Out) {
-        super(null, options);
+        super(options);
         this._remoteNode = new RESTServerNode<Out, Out>(options, outputType);
 
         this.once('build', this._onRemoteBuild.bind(this));
@@ -26,7 +26,7 @@ export class RESTServerSource<Out extends DataFrame> extends SourceNode<Out> {
             this._remoteNode
                 .pull()
                 .then(() => {
-                    resolve();
+                    resolve(undefined);
                 })
                 .catch(reject);
         });

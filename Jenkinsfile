@@ -6,7 +6,8 @@ pipeline {
                 echo 'Building ...'
                 sh 'npm install'
                 sh 'npm run clean'
-                sh 'npm run build:typescript'
+                sh 'npm run build:cjs'
+                sh 'npm run build:esm'
                 sh 'npm run build:webpack'
             }
         }
@@ -70,8 +71,8 @@ pipeline {
                 reportFiles: '*.*',
                 reportName: "Documentation"
             ])
-            archiveArtifacts artifacts: 'dist/openhps-rest-client.js', fingerprint: true
-            archiveArtifacts artifacts: 'dist/openhps-rest-client.min.js', fingerprint: true
+            archiveArtifacts artifacts: 'dist/openhps-rest.js', fingerprint: true
+            archiveArtifacts artifacts: 'dist/openhps-rest.min.js', fingerprint: true
             deleteDir()
         }
     }

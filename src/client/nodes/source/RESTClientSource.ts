@@ -6,7 +6,7 @@ export class RESTClientSource<Out extends DataFrame> extends SourceNode<Out> {
     private _remoteNode: RESTClientNode<Out, Out>;
 
     constructor(options: ClientOptions) {
-        super(null, options);
+        super(options);
         this._remoteNode = new RESTClientNode<Out, Out>(options);
 
         this.once('build', this._onRemoteBuild.bind(this));
@@ -26,7 +26,7 @@ export class RESTClientSource<Out extends DataFrame> extends SourceNode<Out> {
             this._remoteNode
                 .pull()
                 .then(() => {
-                    resolve();
+                    resolve(undefined);
                 })
                 .catch(reject);
         });

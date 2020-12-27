@@ -10,6 +10,7 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
     constructor(options: ServerOptions, inputType: new () => In) {
         super(options);
         this._inputType = inputType;
+        this.logger = () => undefined;
 
         this.on('build', this._onBuild.bind(this));
         this.on('push', this._localPush.bind(this));
@@ -26,7 +27,7 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
     }
 
     private _localPush(frame: In): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             if (this._pullQueue.length > 0) {
                 const queueItem = this._pullQueue.pop();
                 const res = queueItem.res;
@@ -36,27 +37,15 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
                 });
                 resolve();
             } else {
-                const pushPromises: Array<Promise<void>> = [];
-                this.outputNodes.forEach((node) => {
-                    pushPromises.push(node.push(frame));
-                });
-                Promise.all(pushPromises)
-                    .then(() => {
-                        resolve();
-                    })
-                    .catch(reject);
+                this.outlets.forEach((outlet) => outlet.push(frame as any));
+                resolve();
             }
         });
     }
 
     private _onLocalPull(): Promise<void> {
         return new Promise<void>((resolve, reject) => {
-            const pullPromises: Array<Promise<void>> = [];
-            this.inputNodes.forEach((node) => {
-                pullPromises.push(node.pull());
-            });
-
-            Promise.all(pullPromises)
+            Promise.all(this.inlets.map((inlet) => inlet.pull()))
                 .then(() => {
                     resolve();
                 })

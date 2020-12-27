@@ -2,8 +2,6 @@
   "name": "@openhps/rest",
   "version": "0.1.0-alpha.2",
   "description": "Open Hybrid Positioning System - REST component",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/OpenHPS/openhps-rest.git"
@@ -11,16 +9,31 @@
   "publishConfig": {
     "access": "public"
   },
+  "main": "./dist/cjs/index.js",
+  "type": "commonjs",
+  "types": "./dist/cjs/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
   "scripts": {
     "test": "mocha --experimental-worker",
     "test:jenkins": "jenkins-mocha --cobertura",
     "cover": "nyc mocha && nyc report --reporter=cobertura",
     "lint": "eslint src/**",
     "clean": "shx rm -rf ./dist && shx rm -rf ./docs",
-    "build": "npm run clean && npm-run-all --parallel build:typescript build:typedoc && npm run build:webpack",
-    "build:typescript": "tsc",
+    "build": "npm run clean && npm-run-all --parallel build:cjs build:esm build:typedoc && npm run build:webpack",
+    "build:esm": "tsc --module es2015 --outDir dist/esm",
+    "build:cjs": "tsc --module commonjs  --outDir dist/cjs",
+    "build:webpack": "npm-run-all --parallel build:webpack:*",
+    "build:webpack:prod": "webpack --env prod --progress --",
+    "build:webpack:dev": "webpack --env dev --progress --",
     "build:typedoc": "typedoc --exclude **/_internal/**/* --excludePrivate --hideGenerator --out docs src",
-    "build:webpack": "webpack",
     "publish:development": "standard-version --prerelease alpha -m 'chore(alpha): %s' --author='ci <ci@openhps.org>' && npm publish --tag dev",
     "publish:beta": "standard-version --prerelease beta -m 'chore(beta): %s' --author='ci <ci@openhps.org>' && npm publish --tag beta",
     "publish:release": "standard-version -m 'chore(release): %s' --author='ci <ci@openhps.org>' && npm publish --tag latest"
@@ -28,18 +41,14 @@
   "author": "Maxim Van de Wynckel",
   "license": "Apache-2.0",
   "dependencies": {
-    "@openhps/core": "0.1.0-alpha.76",
     "axios": "^0.19.2",
     "express": "^4.17.1"
   },
+  "peerDependencies": {
+    "@openhps/core": ">=0.2.0-alpha.9"
+  },
   "devDependencies": {
-    "@babel/cli": "^7.11.6",
-    "@babel/core": "^7.11.6",
-    "@babel/node": "^7.10.5",
-    "@babel/plugin-transform-runtime": "^7.11.5",
-    "@babel/preset-env": "^7.11.5",
-    "@babel/register": "^7.11.5",
-    "@babel/runtime": "^7.11.2",
+    "@openhps/core": ">=0.2.0-alpha.9",
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
     "@types/axios": "^0.14.0",
@@ -47,13 +56,13 @@
     "@types/express": "^4.17.8",
     "@types/mocha": "^5.2.7",
     "@types/node": "^13.13.16",
-    "@typescript-eslint/eslint-plugin": "^4.0.1",
-    "@typescript-eslint/parser": "^4.0.1",
+    "@typescript-eslint/eslint-plugin": ">=4.0.1",
+    "@typescript-eslint/parser": ">=4.0.1",
     "chai": "^4.2.0",
-    "eslint": "^7.8.1",
+    "eslint": ">=7.8.1",
     "eslint-config-prettier": ">=6.11.0",
     "eslint-plugin-import": ">=2.22.0",
-    "eslint-plugin-jsdoc": "^30.3.1",
+    "eslint-plugin-jsdoc": ">=30.3.1",
     "eslint-plugin-prettier": ">=3.1.4",
     "husky": "^4.2.5",
     "jenkins-mocha": "^8.0.0",
@@ -65,10 +74,9 @@
     "standard-version": "^7.1.0",
     "ts-node": "^8.10.2",
     "typedoc": "^0.15.6",
-    "typescript": "^4.0.2",
-    "webpack": "^4.44.1",
-    "webpack-auto-inject-version": "^1.2.2",
-    "webpack-cli": "^3.3.12"
+    "typescript": ">=4.0.2",
+    "webpack": "^5.11.0",
+    "webpack-cli": "^4.3.0"
   },
   "nyc": {
     "branches": 20,

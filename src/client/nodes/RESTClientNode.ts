@@ -7,6 +7,7 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
 
     constructor(options: ClientOptions) {
         super(options);
+        this.logger = () => undefined;
 
         this.on('push', this._onRemotePush.bind(this));
         this.on('pull', this._onRemotePull.bind(this));
@@ -61,15 +62,9 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
                     switch (response.status) {
                         case 200:
                             if (response.data.frame !== undefined) {
-                                const pushPromises: Array<Promise<void>> = [];
-                                this.outputNodes.forEach((node) => {
-                                    pushPromises.push(node.push(DataSerializer.deserialize(response.data.frame)));
-                                });
-                                Promise.all(pushPromises)
-                                    .then(() => {
-                                        resolve();
-                                    })
-                                    .catch(reject);
+                                const deserializedFrame = DataSerializer.deserialize<Out>(response.data.frame);
+                                this.outlets.forEach((outlet) => outlet.push(deserializedFrame));
+                                resolve();
                             } else {
                                 resolve();
                             }
