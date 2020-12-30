@@ -26,14 +26,14 @@
     "test:jenkins": "jenkins-mocha --cobertura",
     "cover": "nyc mocha && nyc report --reporter=cobertura",
     "lint": "eslint src/**",
-    "clean": "shx rm -rf ./dist && shx rm -rf ./docs",
+    "clean": "shx rm -rf ./dist && shx rm -rf ./docs/out",
     "build": "npm run clean && npm-run-all --parallel build:cjs build:esm build:typedoc && npm run build:webpack",
     "build:esm": "tsc --module es2015 --outDir dist/esm",
     "build:cjs": "tsc --module commonjs  --outDir dist/cjs",
     "build:webpack": "npm-run-all --parallel build:webpack:*",
     "build:webpack:prod": "webpack --env prod --progress --",
     "build:webpack:dev": "webpack --env dev --progress --",
-    "build:typedoc": "typedoc --exclude **/_internal/**/* --excludePrivate --hideGenerator --out docs src",
+    "build:typedoc": "typedoc --options docs/typedoc.json",
     "publish:development": "standard-version --prerelease alpha -m 'chore(alpha): %s' --author='ci <ci@openhps.org>' && npm publish --tag dev",
     "publish:beta": "standard-version --prerelease beta -m 'chore(beta): %s' --author='ci <ci@openhps.org>' && npm publish --tag beta",
     "publish:release": "standard-version -m 'chore(release): %s' --author='ci <ci@openhps.org>' && npm publish --tag latest"
@@ -41,16 +41,16 @@
   "author": "Maxim Van de Wynckel",
   "license": "Apache-2.0",
   "dependencies": {
-    "axios": "^0.19.2",
-    "express": "^4.17.1"
+    "axios": ">=0.19.2",
+    "express": ">=4.17.1"
   },
   "peerDependencies": {
     "@openhps/core": ">=0.2.0-alpha.9"
   },
   "devDependencies": {
     "@openhps/core": ">=0.2.0-alpha.9",
-    "@commitlint/cli": "^8.3.5",
-    "@commitlint/config-conventional": "^8.3.4",
+    "@commitlint/cli": "^11.0.0",
+    "@commitlint/config-conventional": "^11.0.0",
     "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.12",
     "@types/express": "^4.17.8",
@@ -70,10 +70,10 @@
     "npm-run-all": "^4.1.5",
     "nyc": "^14.1.1",
     "prettier": "^2.1.1",
-    "shx": "^0.3.2",
+    "shx": "^0.3.3",
     "standard-version": "^7.1.0",
     "ts-node": "^8.10.2",
-    "typedoc": "^0.15.6",
+    "typedoc": "^0.20.5",
     "typescript": ">=4.0.2",
     "webpack": "^5.11.0",
     "webpack-cli": "^4.3.0"
@@ -104,16 +104,11 @@
   "engines": {
     "node": ">=12.0.0"
   },
-  "config": {
-    "commitizen": {
-      "path": "cz-conventional-changelog"
-    }
-  },
   "husky": {
     "hooks": {
       "pre-commit": "npm run lint",
       "pre-push": "npm run test",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS --no-verify"
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   }
 }

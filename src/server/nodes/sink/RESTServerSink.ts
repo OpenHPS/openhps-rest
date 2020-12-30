@@ -2,6 +2,9 @@ import { DataFrame, SinkNode, ModelBuilder, EdgeBuilder } from '@openhps/core';
 import { RESTServerNode } from '../RESTServerNode';
 import { ServerOptions } from '../ServerOptions';
 
+/**
+ * @category Server
+ */
 export class RESTServerSink<In extends DataFrame> extends SinkNode<In> {
     private _remoteNode: RESTServerNode<In, In>;
 

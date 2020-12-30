@@ -2,6 +2,9 @@ import { DataFrame, SourceNode, ModelBuilder, EdgeBuilder } from '@openhps/core'
 import { RESTServerNode } from '../RESTServerNode';
 import { ServerOptions } from '../ServerOptions';
 
+/**
+ * @category Server
+ */
 export class RESTServerSource<Out extends DataFrame> extends SourceNode<Out> {
     private _remoteNode: RESTServerNode<Out, Out>;
 

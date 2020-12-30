@@ -2,6 +2,9 @@ import { DataFrame, SinkNode } from '@openhps/core';
 import { RESTClientNode } from '../RESTClientNode';
 import { ClientOptions } from '../ClientOptions';
 
+/**
+ * @category Client
+ */
 export class RESTClientSink<In extends DataFrame> extends SinkNode<In> {
     private _remoteNode: RESTClientNode<In, In>;
 

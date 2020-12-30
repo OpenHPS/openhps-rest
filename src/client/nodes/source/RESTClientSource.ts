@@ -2,6 +2,9 @@ import { DataFrame, SourceNode, ModelBuilder, EdgeBuilder } from '@openhps/core'
 import { RESTClientNode } from '../RESTClientNode';
 import { ClientOptions } from '../ClientOptions';
 
+/**
+ * @category Client
+ */
 export class RESTClientSource<Out extends DataFrame> extends SourceNode<Out> {
     private _remoteNode: RESTClientNode<Out, Out>;
 

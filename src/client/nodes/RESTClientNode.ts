@@ -2,6 +2,9 @@ import { DataSerializer, Node, DataFrame } from '@openhps/core';
 import Axios, { AxiosResponse } from 'axios';
 import { ClientOptions } from './ClientOptions';
 
+/**
+ * @category Client
+ */
 export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends Node<In, Out> {
     protected options: ClientOptions;
 

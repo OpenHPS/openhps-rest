@@ -67,12 +67,14 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: true,
                 keepAll: true,
-                reportDir: 'docs',
+                reportDir: 'docs/out',
                 reportFiles: '*.*',
                 reportName: "Documentation"
             ])
-            archiveArtifacts artifacts: 'dist/openhps-rest.js', fingerprint: true
-            archiveArtifacts artifacts: 'dist/openhps-rest.min.js', fingerprint: true
+            archiveArtifacts artifacts: 'dist/web/openhps-rest.js', fingerprint: true
+            archiveArtifacts artifacts: 'dist/web/openhps-rest.js.map', fingerprint: true
+            archiveArtifacts artifacts: 'dist/web/openhps-rest.min.js', fingerprint: true
+            archiveArtifacts artifacts: 'dist/web/openhps-rest.min.js.map', fingerprint: true
             deleteDir()
         }
     }

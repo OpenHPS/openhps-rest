@@ -2,6 +2,9 @@ import { DataFrame, Node, DataSerializer } from '@openhps/core';
 import { ServerOptions } from './ServerOptions';
 import * as express from 'express';
 
+/**
+ * @category Server
+ */
 export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends Node<In, Out> {
     protected options: ServerOptions;
     private _inputType: new () => In;
