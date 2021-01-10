@@ -1,4 +1,4 @@
-import { DataFrame, SinkNode, ModelBuilder, EdgeBuilder } from '@openhps/core';
+import { DataFrame, SinkNode, ModelBuilder, Edge } from '@openhps/core';
 import { RESTServerNode } from '../RESTServerNode';
 import { ServerOptions } from '../ServerOptions';
 
@@ -19,7 +19,7 @@ export class RESTServerSink<In extends DataFrame> extends SinkNode<In> {
         this._remoteNode.graph = this.graph;
         this._remoteNode.logger = this.logger;
         graphBuilder.addNode(this._remoteNode);
-        graphBuilder.addEdge(EdgeBuilder.create().from(this).to(this._remoteNode).build());
+        graphBuilder.addEdge(new Edge(this, this._remoteNode));
         return this._remoteNode.emitAsync('build', graphBuilder);
     }
 

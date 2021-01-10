@@ -45,10 +45,10 @@
     "express": ">=4.17.1"
   },
   "peerDependencies": {
-    "@openhps/core": ">=0.2.0-alpha.9"
+    "@openhps/core": ">=0.2.0-alpha.19"
   },
   "devDependencies": {
-    "@openhps/core": ">=0.2.0-alpha.9",
+    "@openhps/core": ">=0.2.0-alpha.19",
     "@commitlint/cli": "^11.0.0",
     "@commitlint/config-conventional": "^11.0.0",
     "@types/axios": "^0.14.0",
