@@ -11,6 +11,7 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
     constructor(options: ClientOptions) {
         super(options);
         this.logger = () => undefined;
+        this.options.config = this.options.config || {};
 
         this.on('push', this._onRemotePush.bind(this));
         this.on('pull', this._onRemotePull.bind(this));
@@ -27,6 +28,7 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
                     frame: DataSerializer.serialize(data),
                 },
                 responseType: 'json',
+                ...this.options.config,
             })
                 .then((response: AxiosResponse) => {
                     this.logger('debug', {
@@ -60,6 +62,7 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
                 url: '/',
                 method: 'get',
                 responseType: 'json',
+                ...this.options.config,
             })
                 .then((response: AxiosResponse) => {
                     switch (response.status) {

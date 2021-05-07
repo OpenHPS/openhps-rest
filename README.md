@@ -37,13 +37,41 @@ npm install @openhps/rest --save
 ```
 
 ### Usage
+
+#### Server (Push-based)
 ```typescript
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
 
 const app = express();
 app.use(bodyParser.json()); // Body parser is required
+server = app.listen(1555, () => {
+    ModelBuilder.create()
+        .from(new RESTServerSource({
+            express: app,
+            path: '/api/v1'
+        }))
+        .to(/* ... */)
+        .build().then(model => {
+            // Server listening on port 1555
+            // endpoint: 127.0.0.1:1555/api/v1
+        });
+});
 ```
+
+#### Client (Push-based)
+```typescript
+ModelBuilder.create()
+    .from(/* ... */)
+    .to(new RESTClientSink({
+        url: 'http://localhost:1555/api/v1',
+    }))
+    .build().then(model => {
+
+    });
+```
+
+#### Middleware
 
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.

@@ -14,6 +14,7 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
         super(options);
         this._inputType = inputType;
         this.logger = () => undefined;
+        this.options.middleware = this.options.middleware || [];
 
         this.on('build', this._onBuild.bind(this));
         this.on('push', this._localPush.bind(this));
@@ -23,8 +24,8 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
     private _onBuild(): Promise<void> {
         return new Promise<void>((resolve) => {
             // Register routes
-            this.options.express.get(this.options.path, this._get.bind(this));
-            this.options.express.post(this.options.path, this._post.bind(this));
+            this.options.express.get(this.options.path, ...this.options.middleware, this._get.bind(this));
+            this.options.express.post(this.options.path, ...this.options.middleware, this._post.bind(this));
             resolve();
         });
     }
