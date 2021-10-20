@@ -1,38 +1,76 @@
+const TerserPlugin = require('terser-webpack-plugin');
 const path = require('path');
+const pkg = require("./package.json");
 
-module.exports = [
-{
-  mode: 'development',
-  entry: './dist/cjs/index.js',
+const LIBRARY_NAME = pkg.name;
+const PROJECT_NAME = pkg.name.replace("@", "").replace("/", "-");
+
+const defaultConfig = env => ({
+  mode: env.prod ? "production" : "development",
   devtool: 'source-map',
-  output: {
-    path: path.resolve(__dirname, 'dist/web'),
-    filename: 'openhps-rest.js',
-    library: '@openhps/rest',
-    libraryTarget: 'umd',
-    umdNamedDefine: true,
-    globalObject: `(typeof self !== 'undefined' ? self : this)`,
+  resolve: {
+    alias: {
+      typescript: false,
+    },
+    fallback: {
+      path: false,
+      fs: false,
+      os: false,
+      util: false,
+      stream: false,
+      url: false,
+      assert: false,
+      tls: false,
+      net: false
+    }
   },
-  externals: ["@openhps/core"],
-},{
-  mode: 'production',
-  entry: './dist/cjs/index.js',
-  devtool: 'source-map',
   optimization: {
-    minimize: true,
+    minimize: env.prod,
+    minimizer: [
+      new TerserPlugin({
+        parallel: true,
+        terserOptions: {
+          keep_classnames: true,
+          sourceMap: true,
+        }
+      })
+    ],
+    portableRecords: true,
+    usedExports: true,
+    providedExports: true
   },
   performance: {
     hints: false,
-    maxEntrypointSize: 512000,
-    maxAssetSize: 512000
+    maxEntrypointSize: 300000,
+    maxAssetSize: 300000
   },
-  externals: ["@openhps/core"],
+});
+
+const bundle = (env, module) => ({
+  name: PROJECT_NAME,
+  entry: `./dist/${module ? "esm" : "cjs"}/client/index.js`,
   output: {
-    path: path.resolve(__dirname, 'dist/web'),
-    filename: 'openhps-rest.min.js',
-    library: '@openhps/rest',
-    libraryTarget: 'umd',
-    umdNamedDefine: true,
-    globalObject: `(typeof self !== 'undefined' ? self : this)`,
-  }
-}];
+    path: path.resolve(__dirname, 'dist'),
+    filename: `web/${PROJECT_NAME}${module ? ".es" : ""}${env.prod ? ".min" : ""}.js`,
+    library: module ? undefined : LIBRARY_NAME,
+    libraryTarget: module ? "module" : "umd",
+    umdNamedDefine: !module,
+    globalObject: module ? undefined : `(typeof self !== 'undefined' ? self : this)`,
+    environment: { module },
+  },
+  experiments: {
+    outputModule: module,
+  },
+  externalsType: module ? "module" : undefined,
+  externals: {
+    '@openhps/core': "./" + (module ? "openhps-core.es" : "openhps-core") + (env.prod ? ".min" : "") + ".js"
+  },
+  devtool: 'source-map',
+  plugins: [],
+  ...defaultConfig(env)
+});
+
+module.exports = env => [
+  bundle(env, true),
+  bundle(env, false),
+];

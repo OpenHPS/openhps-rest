@@ -67,8 +67,8 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
                 .then((response: AxiosResponse) => {
                     switch (response.status) {
                         case 200:
-                            if (response.data.frame !== undefined) {
-                                const deserializedFrame = DataSerializer.deserialize<Out>(response.data.frame);
+                            if ((response.data as any).frame !== undefined) {
+                                const deserializedFrame = DataSerializer.deserialize<Out>((response.data as any).frame);
                                 this.outlets.forEach((outlet) => outlet.push(deserializedFrame));
                                 resolve();
                             } else {
