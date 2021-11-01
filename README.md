@@ -72,6 +72,53 @@ ModelBuilder.create()
 ```
 
 #### Middleware
+The server supports the addition of middleware for the push and pull actions.
+```typescript
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+
+const app = express();
+app.use(bodyParser.json()); // Body parser is required
+server = app.listen(1555, () => {
+    ModelBuilder.create()
+        .from(new RESTServerSource({
+            express: app,
+            path: '/api/v1',
+            middleware: [(req, res, next) => {
+                if (req.body.token === "abc") {
+                    next();
+                } else {
+                    next(new Error('Unauthorized!'));
+                }
+            }]
+        }))
+        .to(/* ... */)
+        .build().then(model => {
+            // Server listening on port 1555
+            // endpoint: 127.0.0.1:1555/api/v1
+        });
+});
+```
+
+#### Client Authentication
+Client authentication can be achieved by providing it in the configuration options.
+More information about available options can be found [here](https://axios-http.com/docs/req_config).
+```typescript
+ModelBuilder.create()
+    .from(/* ... */)
+    .to(new RESTClientSink({
+        url: 'http://localhost:1555/api/v1',
+        config: {
+            auth: {
+                username: "test",
+                password: "123"
+            }
+        }
+    }))
+    .build().then(model => {
+
+    });
+```
 
 ## Contributors
 The framework is open source and is mainly developed by PhD Student Maxim Van de Wynckel as part of his research towards *Hybrid Positioning and Implicit Human-Computer Interaction* under the supervision of Prof. Dr. Beat Signer.

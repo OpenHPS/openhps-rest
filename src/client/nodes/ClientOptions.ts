@@ -6,5 +6,8 @@ import { AxiosRequestConfig } from 'axios';
  */
 export interface ClientOptions extends NodeOptions {
     url: string;
+    /**
+     * Additional configuration options for the client request
+     */
     config?: AxiosRequestConfig;
 }

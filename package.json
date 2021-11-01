@@ -9,32 +9,30 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "./dist/cjs/index.js",
-  "types": "./dist/cjs/index.d.ts",
-  "module": "./dist/esm/index.js",
+  "main": "./lib/cjs/index.js",
+  "types": "./lib/types/index.d.ts",
+  "module": "./lib/esm/index.js",
   "exports": {
-    "require": "./dist/cjs/index.js",
-    "import": "./dist/esm/index.js"
+    "require": "./lib/cjs/index.js",
+    "import": "./lib/esm/index.js"
   },
   "files": [
-    "dist/**/*",
+    "lib/**/*",
     "src/**/*"
   ],
   "scripts": {
     "test": "mocha --config test/.mocharc.json",
     "cover": "nyc mocha --config test/.mocharc.json && nyc report --reporter=cobertura",
     "lint": "eslint src/**",
-    "clean": "shx rm -rf ./dist && shx rm -rf ./docs/out",
-    "build": "npm run clean && npm-run-all --parallel build:cjs build:esm build:typedoc && npm run build:webpack",
-    "build:esm": "tsc --module es2015 --outDir dist/esm",
-    "build:cjs": "tsc --module commonjs  --outDir dist/cjs",
+    "clean": "shx rm -rf ./lib && shx rm -rf ./docs/out",
+    "build": "npm run clean && npm-run-all --parallel build:cjs build:esm build:declarations build:typedoc && npm run build:webpack",
+    "build:declarations": "tsc --declaration --emitDeclarationOnly --outdir lib/types",
+    "build:esm": "tsc --module es2015 --outDir lib/esm",
+    "build:cjs": "tsc --module commonjs  --outDir lib/cjs",
     "build:webpack": "npm-run-all --parallel build:webpack:*",
     "build:webpack:prod": "webpack --env prod --progress --",
     "build:webpack:dev": "webpack --env dev --progress --",
     "build:typedoc": "typedoc --options docs/typedoc.json",
-    "publish:development": "npm run bump:beta && npm publish --tag dev",
-    "publish:beta": "npm run bump:beta && npm publish --tag beta",
-    "publish:release": "npm run bump:beta && npm publish --tag latest",
     "bump:development": "standard-version --prerelease alpha -m 'chore(alpha): %s' --skip.changelog",
     "bump:beta": "standard-version --prerelease beta -m 'chore(beta): %s' --skip.changelog",
     "bump:release": "standard-version -m 'chore(release): %s' --skip.changelog"
@@ -46,12 +44,12 @@
     "express": ">=4.17.1"
   },
   "peerDependencies": {
-    "@openhps/core": ">=0.3.2-alpha.0"
+    "@openhps/core": ">=0.3.2-alpha.9"
   },
   "devDependencies": {
     "@commitlint/cli": "^13.2.1",
     "@commitlint/config-conventional": "^13.2.0",
-    "@openhps/core": ">=0.3.2-alpha.0",
+    "@openhps/core": ">=0.3.2-alpha.9",
     "@types/axios": "^0.14.0",
     "@types/chai": "^4.2.22",
     "@types/express": "^4.17.13",
