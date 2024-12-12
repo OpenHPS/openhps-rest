@@ -6,12 +6,6 @@
     <a href="https://github.com/OpenHPS/openhps-rest/actions/workflows/main.yml" target="_blank">
         <img alt="Build Status" src="https://github.com/OpenHPS/openhps-rest/actions/workflows/main.yml/badge.svg">
     </a>
-    <a href="https://codecov.io/gh/OpenHPS/openhps-rest">
-        <img src="https://codecov.io/gh/OpenHPS/openhps-rest/branch/master/graph/badge.svg"/>
-    </a>
-    <a href="https://codeclimate.com/github/OpenHPS/openhps-rest/" target="_blank">
-        <img alt="Maintainability" src="https://img.shields.io/codeclimate/maintainability/OpenHPS/openhps-rest">
-    </a>
     <a href="https://badge.fury.io/js/@openhps%2Frest">
         <img src="https://badge.fury.io/js/@openhps%2Frest.svg" alt="npm version" height="18">
     </a>
@@ -36,9 +30,9 @@ If you have [npm installed](https://www.npmjs.com/get-npm), start using @openhps
 npm install @openhps/rest --save
 ```
 
-### Usage
+## Usage
 
-#### Server (Push-based)
+### Server (Push-based)
 ```typescript
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
@@ -59,7 +53,7 @@ server = app.listen(1555, () => {
 });
 ```
 
-#### Client (Push-based)
+### Client (Push-based)
 ```typescript
 ModelBuilder.create()
     .from(/* ... */)
@@ -71,7 +65,7 @@ ModelBuilder.create()
     });
 ```
 
-#### Middleware
+### Middleware
 The server supports the addition of middleware for the push and pull actions.
 ```typescript
 import * as express from 'express';
@@ -100,7 +94,7 @@ server = app.listen(1555, () => {
 });
 ```
 
-#### Client Authentication
+### Client Authentication
 Client authentication can be achieved by providing it in the configuration options.
 More information about available options can be found [here](https://axios-http.com/docs/req_config).
 ```typescript
@@ -127,7 +121,7 @@ The framework is open source and is mainly developed by PhD Student Maxim Van de
 Use of OpenHPS, contributions and feedback is highly appreciated. Please read our [contributing guidelines](CONTRIBUTING.md) for more information.
 
 ## License
-Copyright (C) 2019-2022 Maxim Van de Wynckel & Vrije Universiteit Brussel
+Copyright (C) 2019-2024 Maxim Van de Wynckel & Vrije Universiteit Brussel
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
 
