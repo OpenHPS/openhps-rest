@@ -37,7 +37,7 @@ module.exports = tseslint.config(
     // Must stay last so it can switch off the stylistic rules it replaces.
     prettierRecommended,
     {
-        files: ['src/**/*.ts', 'test/**/*.ts'],
+        files: ['**/*.ts'],
         languageOptions: {
             ecmaVersion: 2022,
             sourceType: 'module',
@@ -57,7 +57,8 @@ module.exports = tseslint.config(
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
             '@typescript-eslint/no-require-imports': 'off',
-            // Replaces the archived eslint-plugin-deprecation.
+            // Replaces the archived eslint-plugin-deprecation. Requires type
+            // information, so it is off where there is no tsconfig project.
             '@typescript-eslint/no-deprecated': 'warn',
             // Only became effective with this config: the previous setups declared the
             // rule but never loaded the TypeScript resolver, so it silently matched
@@ -80,7 +81,7 @@ module.exports = tseslint.config(
         },
     },
     {
-        files: ['test/**/*.ts'],
+        files: ['**/test/**/*.ts'],
         rules: {
             'jsdoc/require-returns': 'off',
             'jsdoc/require-param': 'off',
