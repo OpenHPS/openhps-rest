@@ -59,7 +59,6 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
 
     /**
      * Pull request
-     *
      * @param {express.Request} req GET request
      * @param {express.Response} res Response of GET request
      */
@@ -87,7 +86,6 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
 
     /**
      * Push request
-     *
      * @param {express.Request} req POST request
      * @param {express.Response} res Response of POST request
      */
