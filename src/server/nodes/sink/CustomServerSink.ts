@@ -1,7 +1,7 @@
-import { DataFrame, SinkNode } from "@openhps/core";
+import { DataFrame, SinkNode } from '@openhps/core';
 
 export class CustomServerSink<In extends DataFrame> extends SinkNode<In> {
     onPush(data: In): Promise<void> {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
 }

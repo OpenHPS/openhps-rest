@@ -1,5 +1,5 @@
-import { DataFrame, PullOptions, SourceNode, SourceNodeOptions } from "@openhps/core";
-import * as express from "express";
+import { DataFrame, PullOptions, SourceNode, SourceNodeOptions } from '@openhps/core';
+import * as express from 'express';
 
 export class CustomServerSource<Out extends DataFrame> extends SourceNode<Out> {
     protected handler: express.RequestHandler;
@@ -7,7 +7,7 @@ export class CustomServerSource<Out extends DataFrame> extends SourceNode<Out> {
     /**
      * Create a new custom server source
      * @param handler Express request handler
-     * @param options 
+     * @param options
      */
     constructor(handler?: express.RequestHandler, options?: SourceNodeOptions) {
         super(options);
@@ -15,7 +15,6 @@ export class CustomServerSource<Out extends DataFrame> extends SourceNode<Out> {
     }
 
     onPull(options?: PullOptions): Promise<Out> {
-        throw new Error("Method not implemented.");
+        throw new Error('Method not implemented.');
     }
-
 }
