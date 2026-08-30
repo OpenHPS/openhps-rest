@@ -33,6 +33,19 @@ npm install @openhps/rest --save
 
 ## Usage
 
+> **express 5**: `@openhps/rest` requires `express@^5`. The `path` you pass to a
+> server node goes straight to the express router, and express 5 replaced
+> path-to-regexp 0.x with 8.x, so a few patterns that worked under express 4 now
+> throw at route-registration time:
+>
+> | express 4       | express 5                   |
+> | --------------- | --------------------------- |
+> | `/api/*`        | `/api/*splat`               |
+> | `/api/:id?`     | `/api/{:id}`                |
+> | `/api/:id(\d+)` | validate inside the handler |
+>
+> Plain paths such as `/api/v1` are unaffected.
+
 ### Server (Push-based)
 
 ```typescript
