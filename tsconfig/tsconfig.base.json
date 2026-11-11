@@ -4,6 +4,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "noImplicitAny": false,
+        "strict": false,
         "noEmitHelpers": true,
         "importHelpers": true,
         "removeComments": false,
@@ -13,6 +14,7 @@
         "declaration": false,
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
+        "ignoreDeprecations": "6.0",
         "lib": ["DOM", "WebWorker", "ES2022"]
     }
 }

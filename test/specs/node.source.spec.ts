@@ -1,6 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
-import * as express from 'express';
+import express = require('express');
 import * as bodyParser from 'body-parser';
 import * as http from 'http';
 import { ModelBuilder, CallbackSinkNode, DataFrame, Model, DataObject, CallbackSourceNode } from '@openhps/core';
