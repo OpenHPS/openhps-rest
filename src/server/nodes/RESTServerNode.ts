@@ -4,11 +4,19 @@ import * as express from 'express';
 
 /**
  * @category Server
+ *
+ * Routes are registered on the express app at build and unregistered again when
+ * the node is destroyed, so do not run two live nodes on the same app and path.
+ *
+ * There is no built-in authentication: POST bodies are deserialized and pushed
+ * into the graph by anyone who can reach the route. Mount authenticating
+ * `middleware` for every deployment that is not fully trusted.
  */
 export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends Node<In, Out> {
     protected options: ServerOptions;
     private _inputType: new () => In;
     private _pullQueue: Array<QueueItem> = [];
+    private _registeredLayers: Array<express.Router['stack'][number]> = [];
 
     constructor(options: ServerOptions, inputType: new () => In) {
         super(options);
@@ -19,21 +27,29 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
         this.on('build', this._onBuild.bind(this));
         this.on('push', this._localPush.bind(this));
         this.on('pull', this._onLocalPull.bind(this));
+        this.once('destroy', this._onDestroy.bind(this));
     }
 
     private _onBuild(): Promise<void> {
         return new Promise<void>((resolve) => {
-            // Register routes
+            // Register routes, remembering the added layers so they can be unregistered again
+            const stack = this.options.express.router.stack;
+            const registeredAt = stack.length;
             this.options.express.get(this.options.path, ...this.options.middleware, this._get.bind(this));
             this.options.express.post(this.options.path, ...this.options.middleware, this._post.bind(this));
+            this._registeredLayers = stack.slice(registeredAt);
             resolve();
         });
     }
 
     private _localPush(frame: In): Promise<void> {
         return new Promise((resolve) => {
-            if (this._pullQueue.length > 0) {
-                const queueItem = this._pullQueue.pop();
+            // Drop long-polls that were already answered, then serve the oldest one (FIFO).
+            while (this._pullQueue.length > 0 && this._pullQueue[0].res.headersSent) {
+                this._pullQueue.shift();
+            }
+            const queueItem = this._pullQueue.shift();
+            if (queueItem) {
                 const res = queueItem.res;
                 res.status(200).json({
                     message: `Pull performed to node with uid ${this.uid}`,
@@ -73,6 +89,7 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
 
         this.pull()
             .then(() => {
+                this.removeQueuedResponse(res);
                 if (!res.headersSent) {
                     res.status(200).json({
                         message: `Pull performed to node with uid ${this.uid}`,
@@ -80,8 +97,42 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
                 }
             })
             .catch((ex) => {
-                res.status(505).json({ exception: ex });
+                this.removeQueuedResponse(res);
+                if (!res.headersSent) {
+                    res.status(500).json({ exception: ex });
+                }
             });
+    }
+
+    /**
+     * Remove a long-poll from the pull queue once its response has been settled.
+     * @param {express.Response} res Response of the settled GET request
+     */
+    private removeQueuedResponse(res: express.Response): void {
+        const index = this._pullQueue.findIndex((queueItem) => queueItem.res === res);
+        if (index > -1) {
+            this._pullQueue.splice(index, 1);
+        }
+    }
+
+    private _onDestroy(): void {
+        // Unregister the express routes added on build
+        const stack = this.options.express.router.stack;
+        for (const layer of this._registeredLayers) {
+            const index = stack.indexOf(layer);
+            if (index > -1) {
+                stack.splice(index, 1);
+            }
+        }
+        this._registeredLayers = [];
+
+        // Fail any still pending long-poll requests
+        for (const queueItem of this._pullQueue) {
+            if (!queueItem.res.headersSent) {
+                queueItem.res.status(503).json({ exception: 'Server node was destroyed.' });
+            }
+        }
+        this._pullQueue = [];
     }
 
     /**
@@ -91,8 +142,27 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
      */
     private _post(req: express.Request, res: express.Response): void {
         // Parse frame
-        const frameSerialized = req.body.frame;
-        const frameDeserialized = DataSerializer.deserialize(frameSerialized, this._inputType);
+        const frameSerialized = req.body && req.body.frame;
+        if (frameSerialized === undefined) {
+            res.status(400).json({ exception: 'Request body must contain a serialized frame.' });
+            return;
+        }
+
+        // Reject type markers that resolve to the untyped Object branch of the
+        // data serializer, where Function markers are executed: deserializing
+        // untrusted payloads with them would allow remote code execution.
+        if (containsUnsafeTypeMarker(frameSerialized)) {
+            res.status(400).json({ exception: 'Frame contains a type that cannot be deserialized.' });
+            return;
+        }
+
+        let frameDeserialized: In;
+        try {
+            frameDeserialized = DataSerializer.deserialize(frameSerialized, this._inputType);
+        } catch (ex) {
+            res.status(400).json({ exception: ex });
+            return;
+        }
 
         // Perform a push
         this.push(frameDeserialized)
@@ -103,9 +173,35 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
                     });
             })
             .catch((ex) => {
-                res.status(505).json({ exception: ex });
+                res.status(500).json({ exception: ex });
             });
     }
+}
+
+/**
+ * Look for `__type` markers that the data serializer resolves to the untyped
+ * Object branch, whose `Function` markers are evaluated at deserialization.
+ * @param {any} value Serialized frame received from a client
+ * @returns {boolean} Whether the value carries an unsafe type marker
+ */
+function containsUnsafeTypeMarker(value: any): boolean {
+    const stack: Array<any> = [value];
+    while (stack.length > 0) {
+        const current = stack.pop();
+        if (Array.isArray(current)) {
+            for (const element of current) {
+                stack.push(element);
+            }
+        } else if (typeof current === 'object' && current !== null) {
+            if (current['__type'] === 'Function' || current['__type'] === 'Object') {
+                return true;
+            }
+            for (const key of Object.keys(current)) {
+                stack.push(current[key]);
+            }
+        }
+    }
+    return false;
 }
 
 interface QueueItem {

@@ -25,13 +25,6 @@ export class RESTServerSource<Out extends DataFrame> extends SourceNode<Out> {
     }
 
     public onPull(): Promise<Out> {
-        return new Promise((resolve, reject) => {
-            this._remoteNode
-                .pull()
-                .then(() => {
-                    resolve(undefined);
-                })
-                .catch(reject);
-        });
+        return this._remoteNode.pull().then(() => undefined);
     }
 }

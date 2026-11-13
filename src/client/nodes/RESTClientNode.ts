@@ -70,10 +70,8 @@ export class RESTClientNode<In extends DataFrame, Out extends DataFrame> extends
                             if ((response.data as any).frame !== undefined) {
                                 const deserializedFrame = DataSerializer.deserialize<Out>((response.data as any).frame);
                                 this.outlets.forEach((outlet) => outlet.push(deserializedFrame));
-                                resolve();
-                            } else {
-                                resolve();
                             }
+                            resolve();
                             break;
                         default:
                             reject(response.statusText);

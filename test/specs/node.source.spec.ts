@@ -1,7 +1,6 @@
 import 'mocha';
 import { expect } from 'chai';
 import express = require('express');
-import * as bodyParser from 'body-parser';
 import * as http from 'http';
 import { ModelBuilder, CallbackSinkNode, DataFrame, Model, DataObject, CallbackSourceNode } from '@openhps/core';
 import { RESTServerSource, RESTClientSink, RESTServerSink, RESTClientSource } from '../../src';
@@ -18,7 +17,7 @@ describe('node source', () => {
             callbackSink = new CallbackSinkNode();
             // Create HTTP server
             app = express();
-            app.use(bodyParser.json());
+            app.use(express.json());
             server = app.listen(1555, () => {
                 ModelBuilder.create()
                     .from(
@@ -76,7 +75,7 @@ describe('node source', () => {
             callbackSink = new CallbackSinkNode();
             // Create HTTP server
             app = express();
-            app.use(bodyParser.json());
+            app.use(express.json());
             server = app.listen(1555, () => {
                 ModelBuilder.create()
                     .from(
@@ -139,7 +138,7 @@ describe('node source', () => {
             callbackSink = new CallbackSinkNode();
             // Create HTTP server
             app = express();
-            app.use(bodyParser.json());
+            app.use(express.json());
             server = app.listen(1555, () => {
                 ModelBuilder.create()
                     .from(
