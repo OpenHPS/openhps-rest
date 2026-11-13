@@ -30,14 +30,27 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
         this.once('destroy', this._onDestroy.bind(this));
     }
 
+    /**
+     * The route layer stack that receives handlers added via `get` and `post`:
+     * `app.router.stack` for an express app, or the router's own `stack` when a
+     * bare `express.Router()` was passed, which has no `.router` property.
+     * @returns {Array<express.Router['stack'][number]>|undefined} The route layer stack, or undefined when not accessible
+     */
+    private getRouteStack(): Array<express.Router['stack'][number]> | undefined {
+        const express = this.options.express as { router?: express.Router } & express.Router;
+        return (express.router ?? express).stack;
+    }
+
     private _onBuild(): Promise<void> {
         return new Promise<void>((resolve) => {
             // Register routes, remembering the added layers so they can be unregistered again
-            const stack = this.options.express.router.stack;
-            const registeredAt = stack.length;
+            const stack = this.getRouteStack();
+            const registeredAt = stack ? stack.length : 0;
             this.options.express.get(this.options.path, ...this.options.middleware, this._get.bind(this));
             this.options.express.post(this.options.path, ...this.options.middleware, this._post.bind(this));
-            this._registeredLayers = stack.slice(registeredAt);
+            if (stack) {
+                this._registeredLayers = stack.slice(registeredAt);
+            }
             resolve();
         });
     }
@@ -117,11 +130,13 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
 
     private _onDestroy(): void {
         // Unregister the express routes added on build
-        const stack = this.options.express.router.stack;
-        for (const layer of this._registeredLayers) {
-            const index = stack.indexOf(layer);
-            if (index > -1) {
-                stack.splice(index, 1);
+        const stack = this.getRouteStack();
+        if (stack) {
+            for (const layer of this._registeredLayers) {
+                const index = stack.indexOf(layer);
+                if (index > -1) {
+                    stack.splice(index, 1);
+                }
             }
         }
         this._registeredLayers = [];
@@ -148,9 +163,9 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
             return;
         }
 
-        // Reject type markers that resolve to the untyped Object branch of the
-        // data serializer, where Function markers are executed: deserializing
-        // untrusted payloads with them would allow remote code execution.
+        // Reject Function type markers: the data serializer evaluates them at
+        // deserialization, so deserializing untrusted payloads with them would
+        // allow remote code execution.
         if (containsUnsafeTypeMarker(frameSerialized)) {
             res.status(400).json({ exception: 'Frame contains a type that cannot be deserialized.' });
             return;
@@ -179,8 +194,9 @@ export class RESTServerNode<In extends DataFrame, Out extends DataFrame> extends
 }
 
 /**
- * Look for `__type` markers that the data serializer resolves to the untyped
- * Object branch, whose `Function` markers are evaluated at deserialization.
+ * Look for `__type: 'Function'` markers, which the data serializer evaluates at
+ * deserialization. `Object` markers are left alone: the serializer itself emits
+ * them for any plain-object value, so legitimate frames carry them too.
  * @param {any} value Serialized frame received from a client
  * @returns {boolean} Whether the value carries an unsafe type marker
  */
@@ -193,7 +209,7 @@ function containsUnsafeTypeMarker(value: any): boolean {
                 stack.push(element);
             }
         } else if (typeof current === 'object' && current !== null) {
-            if (current['__type'] === 'Function' || current['__type'] === 'Object') {
+            if (current['__type'] === 'Function') {
                 return true;
             }
             for (const key of Object.keys(current)) {
